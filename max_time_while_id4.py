@@ -1,5 +1,6 @@
 import threading
 import time
+import weakref
 import inspect
 
 
@@ -19,16 +20,17 @@ class LimitedTime:
     def __new__(cls, identifier):
         if identifier not in cls._instances:
             cls._instances[identifier] = super(LimitedTime, cls).__new__(cls)
+            # raise NotImplementedError
         return cls._instances[identifier]
 
     def __init__(self, timeout_seconds):
         if not hasattr(self, 'initialized'):
             self.timeout_seconds = timeout_seconds
-            self.start_time = time.time()
+            self.start_time = time.perf_counter()
             self.initialized = True
 
     def __next__(self):
-        if time.time() - self.start_time > self.timeout_seconds:
+        if time.perf_counter() - self.start_time > self.timeout_seconds:
             raise RunTimeoutError(f"Operation timed out after {self.timeout_seconds} seconds")
         return self
 
@@ -41,7 +43,7 @@ def max_time(t):
     filename = frame.f_code.co_filename
     identifier = (thread_id, stack_depth, line_number, filename)
     counter = LimitedTime(identifier)
-    if time.time() - counter.start_time > t:
+    if time.perf_counter() - counter.start_time > t:
         raise RunTimeoutError(f"Operation timed out after {t} seconds")
     return True
 
