@@ -1,6 +1,6 @@
 import time
 
-from timeplus.limit_time import RunTimeoutError, max_time
+from limit_time import max_time, RunTimeoutError
 
 
 def check_if_program_started():
@@ -32,7 +32,7 @@ def main():
         while max_time(3):  # 内部的 max_time
             time.sleep(1)
             j += 1
-            print(f"second-j: {j}")
+            print(f"second: {j}")
     except RunTimeoutError as e:
         print(e)
 
@@ -40,4 +40,5 @@ def main():
 
 
 if __name__ == '__main__':
+    main()
     main()

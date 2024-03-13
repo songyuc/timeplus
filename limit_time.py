@@ -18,14 +18,8 @@ class LimitedTime:
 
     def __init__(self, timeout_seconds):
         if not hasattr(self, 'initialized'):
-            self.timeout_seconds = timeout_seconds
             self.start_time = time.perf_counter()
             self.initialized = True
-
-    def __next__(self):
-        if time.perf_counter() - self.start_time > self.timeout_seconds:
-            raise RunTimeoutError(f"Operation timed out after {self.timeout_seconds} seconds")
-        return self
 
 
 def max_time(t):
