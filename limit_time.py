@@ -7,29 +7,24 @@ class RunTimeoutError(Exception):
     pass
 
 
-class LimitedTime:
+class StartTimeRecorder:
     _instances = {}
 
-    def __new__(cls, identifier):
+    @classmethod
+    def get_start_time(cls, identifier):
+        assert isinstance(identifier, tuple)
         if identifier not in cls._instances:
-            cls._instances[identifier] = super(LimitedTime, cls).__new__(cls)
-            # raise NotImplementedError
+            cls._instances[identifier] = time.perf_counter()
         return cls._instances[identifier]
-
-    def __init__(self, timeout_seconds):
-        if not hasattr(self, 'initialized'):
-            self.start_time = time.perf_counter()
-            self.initialized = True
 
 
 def max_time(t):
-    thread_id = threading.get_ident()
-    stack_depth = len(inspect.stack())
-    frame = inspect.currentframe().f_back
-    line_number = frame.f_lineno
-    filename = frame.f_code.co_filename
-    identifier = (thread_id, stack_depth, line_number, filename)
-    counter = LimitedTime(identifier)
-    if time.perf_counter() - counter.start_time > t:
+    # identifier = (thread_id, stack_depth, filename, line_number, col_offset)
+    identifier = (threading.current_thread().ident,
+                  *((info.filename, info.lineno, info.positions.col_offset) for info in inspect.stack()))
+
+    # 这里使用 Class: StartTimeRecorder 来记录状态，因为python并不推荐在函数中定义静态变量，所以我们设计在类中定义静态变量
+    if (val := time.perf_counter() - StartTimeRecorder.get_start_time(identifier)) > t:
+        print(val)
         raise RunTimeoutError(f"Operation timed out after {t} seconds")
     return True

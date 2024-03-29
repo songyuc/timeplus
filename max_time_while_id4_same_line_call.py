@@ -9,7 +9,8 @@ def check_if_program_started():
     return False
 
 
-def main():
+def main(x=0):
+    assert x == 0
     # 使用示例
     try:
         i = 0
@@ -30,7 +31,7 @@ def main():
     try:
         j = 0
         while max_time(3):  # 内部的 max_time
-            time.sleep(1.1)
+            time.sleep(1)
             j += 1
             print(f"second: {j}")
     except RunTimeoutError as e:
@@ -40,5 +41,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
-    main()
+    main(main())
